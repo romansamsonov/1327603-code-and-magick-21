@@ -2,6 +2,9 @@
 
 const QUANTITY_WIZARDS = 4;
 
+const MIN_NAME_LENGTH = 2;
+const MAX_NAME_LENGTH = 25;
+
 const WIZARD_NAMES = [
   `Иван`,
   `Хуан Себастьян`,
@@ -41,15 +44,114 @@ const EYES_COLOR = [
   `green`
 ];
 
+const FIREBALL_COLOR = [
+  `#ee4830`,
+  `#30a8ee`,
+  `#5ce6c0`,
+  `#e848d5`,
+  `#e6e848`
+];
+
 const wizards = [];
 const similarListElement = document.querySelector(`.setup-similar-list`);
 const similarWizardTemplate = document.querySelector(`#similar-wizard-template`).content;
 const similarItemElement = similarWizardTemplate.querySelector(`.setup-similar-item`);
 
-const userDialog = document.querySelector(`.setup`);
-userDialog.classList.remove(`hidden`);
+const setup = document.querySelector(`.setup`);
+const setupOpen = document.querySelector(`.setup-open`);
+const setupClose = setup.querySelector(`.setup-close`);
+const setupUserName = setup.querySelector(`.setup-user-name`);
 
-const renderWizard = function (wizard) {
+const setupWizard = {
+  coat: {
+    element: setup.querySelector(`.wizard-coat`),
+    input: setup.querySelector(`input[name = 'coat-color']`)
+  },
+  eyes: {
+    element: setup.querySelector(`.wizard-eyes`),
+    input: setup.querySelector(`input[name = 'eyes-color']`)
+  },
+  fireball: {
+    element: setup.querySelector(`.setup-fireball-wrap`),
+    input: setup.querySelector(`input[name = 'fireball-color']`)
+  }
+};
+
+let getRandomElement = (arr) => {
+  return arr[Math.floor(Math.random() * arr.length)];
+};
+
+let changeWizardColor = (object, array, property) => {
+  object.element.addEventListener(`click`, () => {
+    const color = getRandomElement(array);
+    object.element.style = `${property}: ${color}`;
+    object.input.value = `${color}`;
+  });
+};
+
+let onPopupEscPress = (evt) => {
+  if (evt.key === `Escape` && setupUserName !== document.activeElement) {
+    evt.preventDefault();
+    closePopup();
+  }
+};
+
+let openPopup = () => {
+  setup.classList.remove(`hidden`);
+  document.addEventListener(`keydown`, onPopupEscPress);
+  changeWizardColor(setupWizard.coat, COAT_COLOR, `fill`);
+  changeWizardColor(setupWizard.eyes, EYES_COLOR, `fill`);
+  changeWizardColor(setupWizard.fireball, FIREBALL_COLOR, `background`);
+};
+
+let closePopup = () => {
+  setup.classList.add(`hidden`);
+  document.removeEventListener(`keydown`, onPopupEscPress);
+};
+
+setupOpen.addEventListener(`click`, () => {
+  openPopup();
+});
+
+setupOpen.addEventListener(`keydown`, (evt) => {
+  if (evt.key === `Enter`) {
+    openPopup();
+  }
+});
+
+setupClose.addEventListener(`click`, () => {
+  closePopup();
+});
+
+setupClose.addEventListener(`keydown`, (evt) => {
+  if (evt.key === `Enter`) {
+    closePopup();
+  }
+});
+
+setupUserName.addEventListener(`invalid`, () => {
+  if (setupUserName.validity.valueMissing) {
+    setupUserName.setCustomValidity(`Обязательное поле`);
+  } else {
+    setupUserName.setCustomValidity(``);
+  }
+});
+
+setupUserName.addEventListener(`input`, () => {
+  const valueLength = setupUserName.value.length;
+
+  if (valueLength < MIN_NAME_LENGTH) {
+    setupUserName.setCustomValidity(`Ещё ${MIN_NAME_LENGTH - valueLength} симв.`);
+  } else if (valueLength > MAX_NAME_LENGTH) {
+    setupUserName.setCustomValidity(`Удалите лишние ${valueLength - MAX_NAME_LENGTH} симв.`);
+  } else {
+    setupUserName.setCustomValidity(``);
+  }
+
+  setupUserName.reportValidity();
+});
+
+let renderWizard = (wizard) => {
   const wizardElement = similarItemElement.cloneNode(true);
 
   wizardElement.querySelector(`.setup-similar-label`).textContent = wizard.name;
@@ -59,11 +161,7 @@ const renderWizard = function (wizard) {
   return wizardElement;
 };
 
-const getRandomElement = function (arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
-};
-
-const getWizardsList = function () {
+let getWizardsList = () => {
   const fragment = document.createDocumentFragment();
 
   for (let i = 0; i < QUANTITY_WIZARDS; i++) {
@@ -81,5 +179,4 @@ const getWizardsList = function () {
 };
 getWizardsList();
 
-userDialog.querySelector(`.setup-similar`).classList.remove(`hidden`);
-
+setup.querySelector(`.setup-similar`).classList.remove(`hidden`);
