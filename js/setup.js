@@ -137,6 +137,20 @@ setupUserName.addEventListener(`invalid`, () => {
   }
 });
 
+const setupWizardForm = document.querySelector(`.setup-wizard-form`);
+
+setupWizardForm.addEventListener(`submit`, () => {
+  const valueLength = setupUserName.value.length;
+
+  if (setupUserName.checkValidity() == valueLength < MIN_NAME_LENGTH) {
+    setupUserName.setCustomValidity(`Ещё ${MIN_NAME_LENGTH - valueLength} симв.`);
+  } else if (setupUserName.checkValidity() == valueLength > MAX_NAME_LENGTH) {
+    setupUserName.setCustomValidity(`Удалите лишние ${valueLength - MAX_NAME_LENGTH} симв.`);
+  } else {
+    setupUserName.setCustomValidity(``);
+  }
+});
+/*
 setupUserName.addEventListener(`input`, () => {
   const valueLength = setupUserName.value.length;
 
@@ -150,7 +164,7 @@ setupUserName.addEventListener(`input`, () => {
 
   setupUserName.reportValidity();
 });
-
+*/
 let renderWizard = (wizard) => {
   const wizardElement = similarItemElement.cloneNode(true);
 
